@@ -89,12 +89,12 @@ class clusterer:
             try:
                 if len(inputData) < 2:
                     raise ValueError('Error: Inadequate data. The data must contain at least one coordinate and the energy.')
-                self.coords = [coord for coord in inputData[:-1]]
+                self.coords = inputData[:-1]
                 self.weight = inputData[-1]
                 if len(inputData[:-1]) > 10:
                     raise ValueError('Error: The maximum number of dimensions supported is 10')
-                self.Ndim = len(inputData[:-1])
-                self.Npoints = len(self.weight)
+                self.Ndim = self.coords.size
+                self.Npoints = self.weight.size
             except ValueError as ve:
                 print(ve)
                 exit()
@@ -104,12 +104,12 @@ class clusterer:
             try:
                 if len(inputData) < 2:
                     raise ValueError('Error: Inadequate data. The data must contain at least one coordinate and the energy.')
-                self.coords = [coord for coord in inputData[:-1]]
-                self.weight = inputData[-1]
+                self.coords = np.array(inputData[:-1])
+                self.weight = np.array(inputData[-1])
                 if len(inputData[:-1]) > 10:
                     raise ValueError('Error: The maximum number of dimensions supported is 10')
-                self.Ndim = len(inputData[:-1])
-                self.Npoints = len(self.weight)
+                self.Ndim = self.coords.size
+                self.Npoints = self.weight.size
             except ValueError as ve:
                 print(ve)
                 exit()
@@ -141,11 +141,11 @@ class clusterer:
                 if len(coordinate_columns) > 10:    
                     raise ValueError('Error: The maximum number of dimensions supported is 10')
                 self.Ndim = len(coordinate_columns)
-                self.coords = []
-                for col in coordinate_columns:
-                    self.coords.append(list(df[col]))
-                self.weight = list(df['weight'])
-                self.Npoints = len(self.weight)
+                self.Npoints = len(df.index)
+                self.coords = np.zeros(shape=(self.Ndim, self.Npoints))
+                for dim in range(self.Ndim):
+                    self.coords[dim] = np.array(df.iloc[:,dim])
+                self.weight = df['weight']
             except ValueError as ve:
                 print(ve)
                 exit()
