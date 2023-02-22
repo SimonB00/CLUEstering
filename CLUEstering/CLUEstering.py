@@ -14,18 +14,6 @@ def sign():
     else:
         return -1
         
-def findCentroid(punti):
-    """
-    Function that finds the centroids
-    """
-    centroid = []
-    for i in range(len(punti[0])):
-        centroid_i = 0
-        for point in punti:
-            centroid_i += point[i]
-        centroid.append(centroid_i/len(punti))
-    return centroid
-
 def makeBlobs(nSamples, Ndim, nBlobs=4, mean=0, sigma=0.5):
     """
     Returns a test dataframe containing randomly generated 2-dimensional or 3-dimensional blobs. 
@@ -164,63 +152,18 @@ class clusterer:
 
         print('Finished reading points')
     
-    def parameterTuning(self, dimensions, expNClusters, noise = False):
-        # Remember to write the docstring
+    def parameterTuning(self, expNClusters):
+        # First you calculate mean and standard deviations in all the coordinates
+        means = []
+        st_deviations = []
+        for dim in range(self.Ndim):
+            means.append(np.mean(self.coords[dim]))
+            st_deviations.append(np.std(self.coords[dim]))
         
-        # We set a limit of points as a time limit (otherwise it takes too long)
-        limit = 2000
-        ratio = 1.
-        if self.Npoints > limit:
-            ratio = self.Npoints/limit # used to multiply the estimated rhoc
-            self.Npoints = limit
-            transposed = np.array(self.coords).T.tolist()
-            rnd.shuffle(transposed)
-            del transposed[limit:-1]
-            self.coords = np.array(transposed).T.tolist()
-            del self.weight[limit:-1]
-            # print("called:",len(self.coords[0]),self.Npoints)
-        
-        goodCombinations = []
+        # Normalize all the coordinates as x'_j = (x_j - mu_j) / sigma^2_j
+        for dim in range(self.Ndim):
+            for point in range(self.Npoints):
 
-        # If you expect to have noise, in addition to the clusters, 
-        # the number of expected clusters is increased
-        if noise:
-            expNClusters += 1
-        
-        # The lower bound for dc is calculated as the smallest difference between the 
-        # coordinates of two neighbouring points
-        min_dcs = []
-        for coord in self.coords:
-            coord_ = coord.copy()
-            coord_.sort()
-            min_dcs.append(abs(min(np.diff(coord_))))
-        min_dc = pow(self.Ndim, 1/self.Ndim) * pow(max(min_dcs), 2/self.Ndim)
-
-        # The algorithm is run many (2500) times using random sets of parameters sampled in the 
-        # ranges calculated using the user's expected dimension of clusters. Then, only 
-        # the combinations that produce the right number of clusters are saved
-        for i in range(1500):
-            self.dc = np.random.uniform(min_dc, min(dimensions))
-            self.rhoc = np.random.uniform(0., 500.)
-            self.outlier = np.random.uniform(1., max(dimensions)/(2*self.dc)) 
-            self.runCLUE()
-            if self.NClusters == expNClusters:
-                goodCombinations.append([self.dc, self.rhoc, self.outlier])
-        self.goodCombinations = goodCombinations
-
-        # To find the best combination of parameters among all the good ones, the centroid 
-        # of the region in the "phase space" is calculated
-        optimalParameters = findCentroid(self.goodCombinations)
-        self.dc = optimalParameters[0]
-        self.rhoc = optimalParameters[1]*ratio
-        self.outlier = optimalParameters[2]
-        
-        #for comb in self.goodCombinations:
-        #    plt.scatter(x=comb[1], y=comb[0], color = 'blue')
-        #plt.show()
-
-        #plt.scatter(x=comb[1], y=comb[0], color = 'blue')
-        #plt.show()
 
     def runCLUE(self):
         """
