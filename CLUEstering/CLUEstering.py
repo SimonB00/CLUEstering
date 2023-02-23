@@ -154,16 +154,55 @@ class clusterer:
     
     def parameterTuning(self, expNClusters):
         # First you calculate mean and standard deviations in all the coordinates
-        means = []
-        st_deviations = []
+        means = np.zeros(shape=(self.Ndim,1))
+        covariance_matrix = np.cov(self.coords)
         for dim in range(self.Ndim):
-            means.append(np.mean(self.coords[dim]))
-            st_deviations.append(np.std(self.coords[dim]))
+            means[dim] = np.mean(self.coords[dim])
         
-        # Normalize all the coordinates as x'_j = (x_j - mu_j) / sigma^2_j
+        # Normalize all the coordinates as x'_j = (x_j - mu_j) / sigma_j
         for dim in range(self.Ndim):
-            for point in range(self.Npoints):
+            self.coords[dim] = (self.coords[dim] - means[dim]) / sqrt(covariance_matrix[dim][dim])
 
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+
+        for i in range(1000):
+            self.dc = np.random.uniform(0.,2.)
+            self.rhoc = np.random.uniform(0.,self.Npoints/expNClusters)
+            self.outlier = np.random.uniform(1.,3.)
+            self.runCLUE()
+            #plt.scatter(self.dc, self.NClusters)
+            ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='blue')
+            if self.NClusters == expNClusters:
+                ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='red')
+        ax.set_xlim(0.,2.)
+        ax.set_ylim(0.,20.)
+        ax.set_zlim(0,2*expNClusters)
+        plt.show()
+        #plt.ylim(0,6)
+        #plt.show()
+        #for i in range(500):
+        #    self.dc = np.random.uniform(0.,2.)
+        #    self.rhoc = np.random.uniform(0.,30.)
+        #    self.outlier = np.random.uniform(1.,3.)
+        #    self.runCLUE()
+        #    plt.scatter(self.rhoc, self.NClusters)
+        #    #ax.scatter(self.dc, self.rhoc, self.NClusters, color='blue')
+        #    #if self.NClusters == expNClusters:
+        #        #ax.scatter(self.dc, self.rhoc, self.NClusters, color='red')
+        #plt.ylim(0,6)
+        #plt.show()
+        #for i in range(500):
+        #    self.dc = np.random.uniform(0.,2.)
+        #    self.rhoc = np.random.uniform(0.,30.)
+        #    self.outlier = np.random.uniform(1.,3.)
+        #    self.runCLUE()
+        #    plt.scatter(self.outlier, self.NClusters)
+        #    #ax.scatter(self.dc, self.rhoc, self.NClusters, color='blue')
+        #    #if self.NClusters == expNClusters:
+        #        #ax.scatter(self.dc, self.rhoc, self.NClusters, color='red')
+        #plt.ylim(0,6)
+        #plt.show()
 
     def runCLUE(self):
         """
