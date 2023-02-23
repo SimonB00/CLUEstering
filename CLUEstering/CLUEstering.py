@@ -7,6 +7,7 @@ import CLUEsteringCPP as Algo
 import plotly.graph_objects as go
 from sklearn.datasets import make_blobs
 from math import sqrt
+from tqdm import tqdm
 
 def sign():
     sign = rnd.random()
@@ -153,9 +154,9 @@ class clusterer:
 
         print('Finished reading points')
     
-    def parameterTuning(self, expNClusters):
+    def parameterTuning(self):
         # First you calculate mean and standard deviations in all the coordinates
-        means = np.zeros(shape=(self.Ndim,1))
+        means = np.zeros(shape=(self.Ndim, 1))
         covariance_matrix = np.cov(self.coords)
         for dim in range(self.Ndim):
             means[dim] = np.mean(self.coords[dim])
@@ -164,27 +165,30 @@ class clusterer:
         for dim in range(self.Ndim):
             self.coords[dim] = (self.coords[dim] - means[dim]) / sqrt(covariance_matrix[dim][dim])
 
-        x_ = []
-        y_ = []
-        z_ = []
-        for i in range(3000):
-            self.dc = np.random.uniform(0.,1.5)
-            self.rhoc = np.random.uniform(0.,self.Npoints/expNClusters)
-            self.outlier = np.random.uniform(1.,3.)
+        max_nclusters = 0
+        max_i = 0
+        nRun = 2000
+        data = np.zeros(shape=(nRun, 4))
+        for i in tqdm(range(nRun)):
+            self.dc = np.random.uniform(0., 1.5) # This range is general because of the normalization of the coordinates
+            self.rhoc = np.random.uniform(0., self.Npoints)
+            self.outlier = np.random.uniform(1., 3.)
             self.runCLUE()
-            x_.append(self.dc)
-            y_.append(self.rhoc)
-            z_.append(self.NClusters)
-        plot_data = go.Scatter3d(x=x_, y=y_, z=z_, mode='markers')
+            if self.NClusters > max_nclusters:
+                max_nclusters = self.NClusters
+                max_i = i
+            data[i] = np.array([self.dc, self.rhoc, self.outlier, self.NClusters])
+        plot_data = go.Scatter3d(x=data.T[0], y=data.T[1], z=data.T[3], mode='markers')
         fig = go.Figure(plot_data)
-        fig.update_layout(
-            scene = dict(
-                xaxis = dict(range=[0.,1.5],),
-                            yaxis = dict(range=[0.,60.],),
-                            zaxis = dict(range=[0,23],),),
-            )
+        fig.update_layout(scene = dict(xaxis=dict(range=[0.,1.5]), yaxis=dict(range=[0.,self.Npoints]), zaxis=dict(range=[0,max_nclusters]), 
+                    xaxis_title='dc', yaxis_title='rhoc', zaxis_title='nClusters'))
         fig.update_traces(marker_size = 3)
         fig.show()
+
+        self.dc = data[max_i][0]
+        self.rhoc = data[max_i][1]
+        self.outlier = data[max_i][2]
+        print('The number of clusters is: ', data[max_i][3])
 
     def runCLUE(self):
         """
