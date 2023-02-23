@@ -4,6 +4,7 @@ import random as rnd
 import time
 import matplotlib.pyplot as plt
 import CLUEsteringCPP as Algo 
+import plotly.graph_objects as go
 from sklearn.datasets import make_blobs
 from math import sqrt
 
@@ -31,7 +32,7 @@ def makeBlobs(nSamples, Ndim, nBlobs=4, mean=0, sigma=0.5):
     if Ndim == 2:
         data = {'x0': [], 'x1': [], 'weight': []}
         for i in range(nBlobs):
-            centers.append([sign()*15*rnd.random(),sign()*15*rnd.random()])
+            centers.append([sign()*40*rnd.random(),sign()*40*rnd.random()])
         blob_data, blob_labels = make_blobs(n_samples=nSamples,centers=np.array(centers))
         for i in range(nSamples):
             data['x0'] += [blob_data[i][0]]
@@ -166,19 +167,35 @@ class clusterer:
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
 
-        for i in range(1000):
-            self.dc = np.random.uniform(0.,2.)
+        x_ = []
+        y_ = []
+        z_ = []
+        for i in range(3000):
+            self.dc = np.random.uniform(0.,1.5)
             self.rhoc = np.random.uniform(0.,self.Npoints/expNClusters)
             self.outlier = np.random.uniform(1.,3.)
             self.runCLUE()
             #plt.scatter(self.dc, self.NClusters)
-            ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='blue')
-            if self.NClusters == expNClusters:
-                ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='red')
-        ax.set_xlim(0.,2.)
-        ax.set_ylim(0.,20.)
-        ax.set_zlim(0,2*expNClusters)
-        plt.show()
+            #ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='blue')
+            x_.append(self.dc)
+            y_.append(self.rhoc)
+            z_.append(self.NClusters)
+            #if self.NClusters == expNClusters:
+            #    ax.scatter(self.dc, self.rhoc, self.NClusters, s=5, color='red')
+        plot_data = go.Scatter3d(x=x_, y=y_, z=z_, mode='markers')
+        fig = go.Figure(plot_data)
+        fig.update_layout(
+            scene = dict(
+                xaxis = dict(range=[0.,1.5],),
+                            yaxis = dict(range=[0.,60.],),
+                            zaxis = dict(range=[0,23],),),
+            )
+        fig.update_traces(marker_size = 3)
+        fig.show()
+        #ax.set_xlim(0.,2.)
+        #ax.set_ylim(0.,20.)
+        #ax.set_zlim(0,2*expNClusters)
+        #plt.show()
         #plt.ylim(0,6)
         #plt.show()
         #for i in range(500):
