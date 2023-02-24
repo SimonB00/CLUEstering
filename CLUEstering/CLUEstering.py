@@ -15,6 +15,18 @@ def sign():
         return 1
     else:
         return -1
+
+def findCentroid(points):
+    """
+    Function that finds the centroids
+    """
+    centroid = []
+    for i in range(len(points[0])):
+        centroid_i = 0
+        for coord in points:
+            centroid_i += coord[i]
+        centroid.append(centroid_i/len(coord))
+    return centroid    
         
 def makeBlobs(nSamples, Ndim, nBlobs=4, mean=0, sigma=0.5):
     """
@@ -154,8 +166,8 @@ class clusterer:
 
         print('Finished reading points')
     
-    def parameterTuning(self):
-        # First you calculate mean and standard deviations in all the coordinates
+    def parameterTuning(self, nRun=2000):
+        # Calculate mean and standard deviations in all the coordinates
         means = np.zeros(shape=(self.Ndim, 1))
         covariance_matrix = np.cov(self.coords)
         for dim in range(self.Ndim):
@@ -166,8 +178,6 @@ class clusterer:
             self.coords[dim] = (self.coords[dim] - means[dim]) / sqrt(covariance_matrix[dim][dim])
 
         max_nclusters = 0
-        max_i = 0
-        nRun = 2000
         data = np.zeros(shape=(nRun, 4))
         for i in tqdm(range(nRun)):
             self.dc = np.random.uniform(0., 1.5) # This range is general because of the normalization of the coordinates
@@ -176,8 +186,18 @@ class clusterer:
             self.runCLUE()
             if self.NClusters > max_nclusters:
                 max_nclusters = self.NClusters
-                max_i = i
             data[i] = np.array([self.dc, self.rhoc, self.outlier, self.NClusters])
+        print(np.unique(data.T[3]))
+        
+        # Get the obtained values for the number of clusters and remove isolated values
+        nclusters_values = np.unique(data.T[3])
+        for value in range(len(nclusters_values) - 1):
+            if nclusters_values[value + 1] > nclusters_values[value] + 1:
+                data = np.delete(data, [i for i in range(len(data)) if data[i][3] >= value+1], 0)
+                break
+        max_nclusters = max(data.T[3])
+        print(max_nclusters)
+
         plot_data = go.Scatter3d(x=data.T[0], y=data.T[1], z=data.T[3], mode='markers')
         fig = go.Figure(plot_data)
         fig.update_layout(scene = dict(xaxis=dict(range=[0.,1.5]), yaxis=dict(range=[0.,self.Npoints]), zaxis=dict(range=[0,max_nclusters]), 
@@ -185,10 +205,10 @@ class clusterer:
         fig.update_traces(marker_size = 3)
         fig.show()
 
-        self.dc = data[max_i][0]
-        self.rhoc = data[max_i][1]
-        self.outlier = data[max_i][2]
-        print('The number of clusters is: ', data[max_i][3])
+        #self.dc = data[max_i][0]
+        #self.rhoc = data[max_i][1]
+        #self.outlier = data[max_i][2]
+        #print('The number of clusters is: ', data[max_i][3])
 
     def runCLUE(self):
         """
