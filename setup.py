@@ -25,7 +25,7 @@ setup(
 	 long_description=long_description,
 	 long_description_content_type='text/markdown',
 	 packages=find_packages(),
-	 install_requires=['scikit-learn','numpy','matplotlib','pandas'],
+	 install_requires=['scikit-learn','numpy','matplotlib','pandas','plotly'],
 	 ext_modules=ext_modules,
 	 keywords=['Python','Clustering','Binding'],
 	 python_requires='>=3.7',
