@@ -18,15 +18,27 @@ def sign():
 
 def findCentroid(points):
     """
-    Function that finds the centroids
     """
-    centroid = []
-    for i in range(len(points[0])):
-        centroid_i = 0
-        for coord in points:
-            centroid_i += coord[i]
-        centroid.append(centroid_i/len(coord))
+    
+    centroid = [0,0,0]
+    for point in points:
+        for i in range(len(point) - 1):
+            centroid[i] += point[i] 
+    centroid = [x/len(points) for x in centroid]
     return centroid    
+
+def removeBadRuns(runsResults):
+    """
+    """
+
+    while True:
+        if runsResults[-1] > 2 * runsResults[-2]:
+            runsResults = np.delete(runsResults, -1)
+        else:
+            break
+
+    return runsResults
+
         
 def makeBlobs(nSamples, Ndim, nBlobs=4, mean=0, sigma=0.5, x_max=15, y_max=15):
     """
@@ -113,8 +125,6 @@ class clusterer:
         inputData (list or numpy array): The list or numpy array should contain a list of lists for the coordinates and a list for the weight.
         """
 
-        #print('Start reading points')
-        
         # numpy array
         if type(inputData) == np.array:
             try:
@@ -181,8 +191,6 @@ class clusterer:
                 print(ve)
                 exit()
 
-        #print('Finished reading points')
-
     def chooseKernel(self, choice, parameters=[], function = lambda : 0):
         """
         Changes the kernel used in the calculation of local density. The default kernel is a flat kernel with parameter 0.5
@@ -217,6 +225,34 @@ class clusterer:
         except ValueError as ve:
             print(ve)
             exit()
+
+    def findCentroid(self, data, nclusters):
+        filtered_data = []
+        for x in data:
+            if x[3] == nclusters:
+                filtered_data.append(x)
+        centroid = findCentroid(filtered_data)
+
+        return centroid
+
+    def isStable(self, data, nclusters, delta_dc, delta_rhoc, delta_outlier):
+        # First you calculate the centroid corresponding to that number of clusters
+        centroid = self.findCentroid(data, nclusters)
+        
+        # You run again clue with parameters in the neighborhood of the centroid
+        # to check if the number of clusters changes
+        ntest_runs = 20
+        succesful_runs = 0.
+        for i in range(ntest_runs):
+            self.dc = np.random.uniform(centroid[0] - 5*delta_dc, centroid[0] + 5*delta_dc) 
+            self.rhoc = np.random.uniform(centroid[1] - 5*delta_rhoc, centroid[1] + 5*delta_rhoc) 
+            self.outlier = np.random.uniform(centroid[2] - 5*delta_outlier, centroid[2] + 5*delta_outlier)
+            self.runCLUE()
+            if self.NClusters == nclusters:
+                succesful_runs += 1
+                
+        if succesful_runs / ntest_runs == 1.0:
+            return True
     
     def parameterTuning(self, nRun=2000):
         # Calculate mean and standard deviations in all the coordinates
@@ -230,37 +266,45 @@ class clusterer:
             self.coords[dim] = (self.coords[dim] - means[dim]) / sqrt(covariance_matrix[dim][dim])
 
         max_nclusters = 0
-        data = np.zeros(shape=(nRun, 4))
+        data = []
         for i in tqdm(range(nRun)):
-            self.dc = np.random.uniform(0., 1.5) # This range is general because of the normalization of the coordinates
-            self.rhoc = np.random.uniform(0., self.Npoints)
-            self.outlier = np.random.uniform(1., 3.)
+            self.dc = np.random.uniform(0., 1.0) # This range is general because of the normalization of the coordinates
+            self.rhoc = np.random.uniform(0., self.Npoints) # The maximum possible value is when the distribution of the points is a dirac's delta
+            self.outlier = np.random.uniform(1., 2.0)
             self.runCLUE()
             if self.NClusters > max_nclusters:
                 max_nclusters = self.NClusters
-            data[i] = np.array([self.dc, self.rhoc, self.outlier, self.NClusters])
+            data.append([self.dc, self.rhoc, self.outlier, self.NClusters])
+        data = np.array(data)
         print(np.unique(data.T[3]))
         
-        # Get the obtained values for the number of clusters and remove isolated values
-        nclusters_values = np.unique(data.T[3])
-        for value in range(len(nclusters_values) - 1):
-            if nclusters_values[value + 1] > nclusters_values[value] + 1:
-                data = np.delete(data, [i for i in range(len(data)) if data[i][3] >= value+1], 0)
-                break
-        max_nclusters = max(data.T[3])
-        print(max_nclusters)
-
         plot_data = go.Scatter3d(x=data.T[0], y=data.T[1], z=data.T[3], mode='markers')
         fig = go.Figure(plot_data)
-        fig.update_layout(scene = dict(xaxis=dict(range=[0.,1.5]), yaxis=dict(range=[0.,self.Npoints]), zaxis=dict(range=[0,max_nclusters]), 
-                    xaxis_title='dc', yaxis_title='rhoc', zaxis_title='nClusters'))
+        fig.update_layout(scene = dict(xaxis=dict(range=[0.,1.5]), 
+                                       yaxis=dict(range=[0.,self.Npoints]), 
+                                       zaxis=dict(range=[0,max_nclusters]), 
+                                       xaxis_title='dc', 
+                                       yaxis_title='rhoc', 
+                                       zaxis_title='nClusters'))
         fig.update_traces(marker_size = 3)
         fig.show()
 
-        #self.dc = data[max_i][0]
-        #self.rhoc = data[max_i][1]
-        #self.outlier = data[max_i][2]
-        #print('The number of clusters is: ', data[max_i][3])
+        # Get the obtained values for the number of clusters and remove isolated values
+        nclusters_values = np.unique(data.T[3])
+        # Filter the obtained numbers of clusters by removing the ones due to splitting
+        nclusters_values = removeBadRuns(nclusters_values)
+
+        # Starting from the highest value of nclusters, check the stability of the values
+        # until you find one that is stable
+        nclusters_values = np.flip(nclusters_values)
+        for value in nclusters_values:
+            if self.isStable(data, value, 1.5/nRun, self.Npoints/nRun, 2./nRun):
+                centroid = self.findCentroid(data, value)
+                self.dc = centroid[0]
+                self.rhoc = centroid[1]
+                self.outlier = centroid[2]
+                print('The number of clusters is: ', self.NClusters)
+                break
 
     def runCLUE(self, verbose=False):
         """
@@ -401,3 +445,200 @@ class clusterer:
 
         df = pd.DataFrame(data)
         df.to_csv(outPath,index=False)
+
+print('4 blobs')
+a = clusterer(1,5,1.5)
+a.readData('~/Downloads/event_1.csv')
+a.inputPlotter()
+a.parameterTuning(1000)
+a.clusterPlotter()
+a.dc = 1
+a.rhoc = 5
+a.outlier = 1.5
+a.parameterTuning(2000)
+a.clusterPlotter()
+a.dc = 1
+a.rhoc = 5
+a.outlier = 1.5
+a.parameterTuning(3000)
+a.clusterPlotter()
+c = clusterer(1,5,1.5)
+c.readData(makeBlobs(1000,2,4,sigma=0.01))
+c.inputPlotter()
+c.parameterTuning(1000)
+c.clusterPlotter()
+c.dc = 1
+c.rhoc = 5
+c.outlier = 1.5
+c.parameterTuning(2000)
+c.clusterPlotter()
+c.dc = 1
+c.rhoc = 5
+c.outlier = 1.5
+c.parameterTuning(3000)
+c.clusterPlotter()
+# c.dc = 1
+# c.rhoc = 5
+# c.outlier = 1.5
+# c.parameterTuning(4000)
+# c.clusterPlotter()
+# c.dc = 1
+# c.rhoc = 5
+# c.outlier = 1.5
+# c.parameterTuning(5000)
+# c.clusterPlotter()
+# c.dc = 1
+# c.rhoc = 5
+# c.outlier = 1.5
+# c.parameterTuning(6000)
+# c.clusterPlotter()
+# c.dc = 1
+# c.rhoc = 5
+# c.outlier = 1.5
+# c.parameterTuning(7000)
+# c.clusterPlotter()
+# c.dc = 1
+# c.rhoc = 5
+# c.outlier = 1.5
+# c.parameterTuning(8000)
+# c.clusterPlotter()
+print('8 blobs')
+d = clusterer(1,5,1.5)
+d.readData(makeBlobs(1000,2,8,sigma=0.01))
+d.inputPlotter()
+d.parameterTuning(1000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(2000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(3000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(4000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(5000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(6000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(7000)
+d.clusterPlotter()
+d.dc = 1
+d.rhoc = 5
+d.outlier = 1.5
+d.parameterTuning(8000)
+d.clusterPlotter()
+print('10 blobs')
+e = clusterer(1,5,1.5)
+e.readData(makeBlobs(1000,2,10,sigma=0.01))
+e.inputPlotter()
+e.parameterTuning(1000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(2000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(3000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(4000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(5000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(6000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(7000)
+e.dc = 1
+e.rhoc = 5
+e.outlier = 1.5
+e.parameterTuning(8000)
+print('15 blobs')
+f = clusterer(1,5,1.5)
+f.readData(makeBlobs(1000,2,15,sigma=0.01))
+f.inputPlotter()
+f.parameterTuning(1000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(2000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(3000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(4000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(5000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(6000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(7000)
+f.dc = 1
+f.rhoc = 5
+f.outlier = 1.5
+f.parameterTuning(8000)
+print('20 blobs')
+g = clusterer(1,5,1.5)
+g.readData(makeBlobs(1000,2,20,sigma=0.01))
+g.inputPlotter()
+g.parameterTuning(1000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(2000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(3000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(4000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(5000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(6000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(7000)
+g.dc = 1
+g.rhoc = 5
+g.outlier = 1.5
+g.parameterTuning(8000)
