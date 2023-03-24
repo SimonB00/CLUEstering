@@ -227,6 +227,9 @@ class clusterer:
             exit()
 
     def findCentroid(self, data, nclusters):
+        """
+        """
+        
         filtered_data = []
         for x in data:
             if x[3] == nclusters:
@@ -236,9 +239,13 @@ class clusterer:
         return centroid
 
     def isStable(self, data, nclusters, delta_dc, delta_rhoc, delta_outlier):
+        """
+        """
+
         # First you calculate the centroid corresponding to that number of clusters
         centroid = self.findCentroid(data, nclusters)
         
+        stable = False
         # You run again clue with parameters in the neighborhood of the centroid
         # to check if the number of clusters changes
         ntest_runs = 20
@@ -252,9 +259,13 @@ class clusterer:
                 succesful_runs += 1
                 
         if succesful_runs / ntest_runs == 1.0:
-            return True
+            stable = True
+        return stable
     
     def parameterTuning(self, nRun=2000):
+        """
+        """
+
         # Calculate mean and standard deviations in all the coordinates
         means = np.zeros(shape=(self.Ndim, 1))
         covariance_matrix = np.cov(self.coords)
@@ -446,199 +457,104 @@ class clusterer:
         df = pd.DataFrame(data)
         df.to_csv(outPath,index=False)
 
-print('4 blobs')
-a = clusterer(1,5,1.5)
-a.readData('~/Downloads/event_1.csv')
-a.inputPlotter()
-a.parameterTuning(1000)
-a.clusterPlotter()
-a.dc = 1
-a.rhoc = 5
-a.outlier = 1.5
-a.parameterTuning(2000)
-a.clusterPlotter()
-a.dc = 1
-a.rhoc = 5
-a.outlier = 1.5
-a.parameterTuning(3000)
-a.clusterPlotter()
-c = clusterer(1,5,1.5)
-c.readData(makeBlobs(1000,2,4,sigma=0.01))
-c.inputPlotter()
-c.parameterTuning(1000)
-c.clusterPlotter()
-c.dc = 1
-c.rhoc = 5
-c.outlier = 1.5
-c.parameterTuning(2000)
-c.clusterPlotter()
-c.dc = 1
-c.rhoc = 5
-c.outlier = 1.5
-c.parameterTuning(3000)
-c.clusterPlotter()
-# c.dc = 1
-# c.rhoc = 5
-# c.outlier = 1.5
-# c.parameterTuning(4000)
-# c.clusterPlotter()
-# c.dc = 1
-# c.rhoc = 5
-# c.outlier = 1.5
-# c.parameterTuning(5000)
-# c.clusterPlotter()
-# c.dc = 1
-# c.rhoc = 5
-# c.outlier = 1.5
-# c.parameterTuning(6000)
-# c.clusterPlotter()
-# c.dc = 1
-# c.rhoc = 5
-# c.outlier = 1.5
-# c.parameterTuning(7000)
-# c.clusterPlotter()
-# c.dc = 1
-# c.rhoc = 5
-# c.outlier = 1.5
-# c.parameterTuning(8000)
-# c.clusterPlotter()
-print('8 blobs')
-d = clusterer(1,5,1.5)
-d.readData(makeBlobs(1000,2,8,sigma=0.01))
-d.inputPlotter()
-d.parameterTuning(1000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(2000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(3000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(4000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(5000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(6000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(7000)
-d.clusterPlotter()
-d.dc = 1
-d.rhoc = 5
-d.outlier = 1.5
-d.parameterTuning(8000)
-d.clusterPlotter()
-print('10 blobs')
-e = clusterer(1,5,1.5)
-e.readData(makeBlobs(1000,2,10,sigma=0.01))
-e.inputPlotter()
-e.parameterTuning(1000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(2000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(3000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(4000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(5000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(6000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(7000)
-e.dc = 1
-e.rhoc = 5
-e.outlier = 1.5
-e.parameterTuning(8000)
-print('15 blobs')
-f = clusterer(1,5,1.5)
-f.readData(makeBlobs(1000,2,15,sigma=0.01))
-f.inputPlotter()
-f.parameterTuning(1000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(2000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(3000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(4000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(5000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(6000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(7000)
-f.dc = 1
-f.rhoc = 5
-f.outlier = 1.5
-f.parameterTuning(8000)
-print('20 blobs')
-g = clusterer(1,5,1.5)
-g.readData(makeBlobs(1000,2,20,sigma=0.01))
-g.inputPlotter()
-g.parameterTuning(1000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(2000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(3000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(4000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(5000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(6000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(7000)
-g.dc = 1
-g.rhoc = 5
-g.outlier = 1.5
-g.parameterTuning(8000)
+if __name__ == "__main__":
+    from sklearn.datasets import make_moons
+
+    data = {'x0': [], 'x1': [], 'weight': []}
+    moon_data, moon_labels = make_moons(n_samples=1000, noise=0.04)
+    for i in range(1000):
+        data['x0'] += [moon_data[i][0]]
+        data['x1'] += [moon_data[i][1]]
+        data['weight'] += [1]
+
+    b = clusterer(1,5,1.5)
+    b.readData(pd.DataFrame(data))
+    b.inputPlotter()
+    b.parameterTuning(1000)
+    b.clusterPlotter()
+
+    a = clusterer(1,5,1.5)
+    a.readData('~/Downloads/event_1.csv')
+    a.inputPlotter()
+    a.parameterTuning(1000)
+    a.clusterPlotter()
+    a.parameterTuning(2000)
+    a.clusterPlotter()
+    a.parameterTuning(3000)
+    a.clusterPlotter()
+    print('4 blobs')
+    c = clusterer(1,5,1.5)
+    c.readData(makeBlobs(1000,2,4,sigma=0.01))
+    c.inputPlotter()
+    c.parameterTuning(1000)
+    c.clusterPlotter()
+    c.parameterTuning(2000)
+    c.clusterPlotter()
+    c.parameterTuning(3000)
+    c.clusterPlotter()
+    c.parameterTuning(4000)
+    c.clusterPlotter()
+    c.parameterTuning(5000)
+    c.clusterPlotter()
+    c.parameterTuning(6000)
+    c.clusterPlotter()
+    c.parameterTuning(7000)
+    c.clusterPlotter()
+    c.parameterTuning(8000)
+    c.clusterPlotter()
+    print('8 blobs')
+    d = clusterer(1,5,1.5)
+    d.readData(makeBlobs(1000,2,8,sigma=0.01))
+    d.inputPlotter()
+    d.parameterTuning(1000)
+    d.clusterPlotter()
+    d.parameterTuning(2000)
+    d.clusterPlotter()
+    d.parameterTuning(3000)
+    d.clusterPlotter()
+    d.parameterTuning(4000)
+    d.clusterPlotter()
+    d.parameterTuning(5000)
+    d.clusterPlotter()
+    d.parameterTuning(6000)
+    d.clusterPlotter()
+    d.parameterTuning(7000)
+    d.clusterPlotter()
+    d.parameterTuning(8000)
+    d.clusterPlotter()
+    print('10 blobs')
+    e = clusterer(1,5,1.5)
+    e.readData(makeBlobs(1000,2,10,sigma=0.01))
+    e.inputPlotter()
+    e.parameterTuning(1000)
+    e.parameterTuning(2000)
+    e.parameterTuning(3000)
+    e.parameterTuning(4000)
+    e.parameterTuning(5000)
+    e.parameterTuning(6000)
+    e.parameterTuning(7000)
+    e.parameterTuning(8000)
+    print('15 blobs')
+    f = clusterer(1,5,1.5)
+    f.readData(makeBlobs(1000,2,15,sigma=0.01))
+    f.inputPlotter()
+    f.parameterTuning(1000)
+    f.parameterTuning(2000)
+    f.parameterTuning(3000)
+    f.parameterTuning(4000)
+    f.parameterTuning(5000)
+    f.parameterTuning(6000)
+    f.parameterTuning(7000)
+    f.parameterTuning(8000)
+    print('20 blobs')
+    g = clusterer(1,5,1.5)
+    g.readData(makeBlobs(1000,2,20,sigma=0.01))
+    g.inputPlotter()
+    g.parameterTuning(1000)
+    g.parameterTuning(2000)
+    g.parameterTuning(3000)
+    g.parameterTuning(4000)
+    g.parameterTuning(5000)
+    g.parameterTuning(6000)
+    g.parameterTuning(7000)
+    g.parameterTuning(8000)
