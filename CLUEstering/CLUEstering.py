@@ -169,8 +169,6 @@ class cluster_properties:
     ----------
     n_clusters : int
         Number of clusters constructed.
-    n_seeds : int
-        Number of seeds found, which indicates the clusters excluding the group of outliers.
     clusters : np.ndarray
         Array containing the list of the clusters found.
     cluster_ids : np.ndarray
@@ -187,7 +185,6 @@ class cluster_properties:
     """
 
     n_clusters : int
-    n_seeds : int
     clusters : np.ndarray
     cluster_ids : np.ndarray
     is_seed : np.ndarray
@@ -197,8 +194,6 @@ class cluster_properties:
 
     def __eq__(self, other):
         if self.n_clusters != other.n_clusters:
-            return False
-        if self.n_seeds != other.n_seeds:
             return False
         if not (self.cluster_ids == other.cluster_ids).all():
             return False
@@ -677,8 +672,6 @@ class clusterer:
         -------------------
         n_clusters : int
             Number of clusters reconstructed.
-        n_seeds : int
-            Number of seeds found, which indicates the clusters excluding the group of outliers.
         clusters : ndarray
             Array containing the list of the clusters found.
         cluster_ids : ndarray
@@ -736,7 +729,6 @@ class clusterer:
         cluster_ids = np.array(cluster_id_is_seed[0])
         is_seed = np.array(cluster_id_is_seed[1])
         clusters = np.unique(cluster_ids)
-        n_seeds = np.sum([1 for i in clusters if i > -1])
         n_clusters = len(clusters)
 
         cluster_points = [[] for _ in range(n_clusters)]
@@ -750,7 +742,6 @@ class clusterer:
         output_df = pd.DataFrame(data)
 
         self.clust_prop = cluster_properties(n_clusters,
-                                             n_seeds,
                                              clusters,
                                              cluster_ids,
                                              is_seed,
@@ -771,14 +762,6 @@ class clusterer:
         '''
 
         return self.clust_prop.n_clusters
-
-    @property
-    def n_seeds(self) -> int:
-        '''
-        Returns the number of seeds found.
-        '''
-
-        return self.clust_prop.n_seeds
 
     @property
     def clusters(self) -> np.ndarray:
