@@ -807,6 +807,23 @@ class clusterer:
         '''
         return self.clust_prop.output_df
 
+    def get_outliers(self) -> np.ndarray:
+        '''
+        Returns the list of outliers found.
+        '''
+        return self.cluster_points[-1]
+
+    def get_clusters(self, index: int) -> np.ndarray:
+        '''
+        Returns the list of points inside the cluster 'index'.
+
+        Parameters
+        ----------
+        index : int
+            The index of the cluster for which the points are returned.
+        '''
+        return self.cluster_points[index]
+
     def cluster_centroid(self, cluster_id: int) -> np.ndarray:
         '''
         Returns the coordinates of the centroid of a cluster.
