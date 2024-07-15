@@ -154,11 +154,11 @@ class clustering_data:
         Number of points in the clustering data.
     """
 
-    coords : np.ndarray
-    original_coords : np.ndarray
-    weight : np.ndarray
-    n_dim : int
-    n_points : int
+    coords: np.ndarray
+    original_coords: np.ndarray
+    weight: np.ndarray
+    n_dim: int
+    n_points: int
 
 @dataclass(eq=False)
 class cluster_properties:
@@ -184,13 +184,13 @@ class cluster_properties:
         Dataframe containing is_seed and cluster_ids as columns.
     """
 
-    n_clusters : int
-    clusters : np.ndarray
-    cluster_ids : np.ndarray
-    is_seed : np.ndarray
-    cluster_points : np.ndarray
-    points_per_cluster : np.ndarray
-    output_df : pd.DataFrame
+    n_clusters: int
+    clusters: np.ndarray
+    cluster_ids: np.ndarray
+    is_seed: np.ndarray
+    cluster_points: np.ndarray
+    points_per_cluster: np.ndarray
+    output_df: pd.DataFrame
 
     def __eq__(self, other):
         if self.n_clusters != other.n_clusters:
