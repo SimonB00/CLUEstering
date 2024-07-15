@@ -729,7 +729,7 @@ class clusterer:
         cluster_ids = np.array(cluster_id_is_seed[0])
         is_seed = np.array(cluster_id_is_seed[1])
         clusters = np.unique(cluster_ids)
-        n_clusters = len(clusters)
+        n_clusters = len(np.delete(clusters, np.where(clusters == -1)))
 
         cluster_points = [[] for _ in range(n_clusters)]
         # note: the outlier set is always the last cluster
