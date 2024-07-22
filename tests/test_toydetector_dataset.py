@@ -1,6 +1,6 @@
 '''
-Testing the algorithm on the circle dataset, a dataset where points are distributed to 
-simulate the hits of a small set of particles in a detector
+Testing the algorithm on the circle dataset, a dataset where points are
+distributed to simulate the hits of a small set of particles in a detector.
 '''
 
 import os
@@ -22,15 +22,15 @@ def toy_det():
 
 def test_clustering(toy_det):
     '''
-    Checks that the output of the clustering is the one given by the truth
-    dataset
+    Checks that the output of the clustering is the one given by the
+    truth dataset.
     '''
 
     # Check if the output file already exists and if it does, delete it
     if os.path.isfile('./toy_det_output.csv'):
         os.remove('./toy_det_output.csv')
 
-    c = clue.clusterer(0.06, 5, 1.)
+    c = clue.clusterer(5., 2.5, 1.)
     c.read_data(toy_det)
     c.run_clue()
     c.to_csv('./', 'toy_det_output.csv')
@@ -40,7 +40,7 @@ def test_clustering(toy_det):
 
 
 if __name__ == "__main__":
-    c = clue.clusterer(0.8, 5, 1.5)
+    c = clue.clusterer(5., 2.5, 1.)
     c.read_data("./test_datasets/toyDetector.csv")
     c.run_clue()
     c.cluster_plotter()
