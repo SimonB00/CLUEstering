@@ -35,7 +35,7 @@ python3 -m pytest test_change_domains.py
 echo "## Test the clustering of points at the opposite extremes of a finite domain"
 python3 -m pytest test_domain_extremes.py
 
-if [[ $1 == "-" || $1 == "--clean" ]]
+if [[ $1 == "-c" || $1 == "--clean" ]]
 then
   rm -f ./*_output.csv
 fi
