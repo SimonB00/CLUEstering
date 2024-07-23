@@ -22,7 +22,8 @@ def aniso():
 
 def test_clustering(aniso):
     '''
-    Checks that the output of the clustering is the one given by the truth dataset
+    Checks that the output of the clustering is the one given by the
+    truth dataset
     '''
 
     # Check if the output file already exists and if it does, delete it
