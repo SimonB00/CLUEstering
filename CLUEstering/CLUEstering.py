@@ -208,6 +208,76 @@ class cluster_properties:
         return True
 
 
+@dataclass
+class Point:
+    """
+    """
+
+    size: float
+    colour: str
+    shape: str
+    alpha: float
+
+
+@dataclass
+class Grid:
+    """
+    """
+
+    linestyle: str
+    linesize: float
+
+
+@dataclass(init=False)
+class PlotterProperties:
+    """
+    """
+
+    title: str
+    point: Point
+    seed: Point
+    outlier: Point
+    grid: Grid
+
+
+@dataclass(init=False)
+class InputPlotterProperties(PlotterProperties):
+    """
+    """
+
+    title: str
+    point: Point
+    seed: Point
+    outlier: Point
+    grid: Grid
+
+    def __init__(self):
+        self.title = ''
+        self.point = Point(10, 'b', 'o', 1)
+        self.seed = Point(25, 'r', 'o', 1)
+        self.outlier = Point(10, 'g', 'o', 1)
+        self.grid = Grid('--', 0.2)
+
+
+@dataclass(init=False)
+class ClusterPlotterProperties(PlotterProperties):
+    """
+    """
+
+    title: str
+    point: Point
+    seed: Point
+    outlier: Point
+    grid: Grid
+
+    def __init__(self):
+        self.title = ''
+        self.point = Point(10, 'b', 'o', 1)
+        self.seed = Point(25, 'r', 'o', 1)
+        self.outlier = Point(10, '0.4', 'x', 1)
+        self.grid = Grid('--', 0.2)
+
+
 class clusterer:
     """
     Class representing a wrapper for the methods using in the process of clustering using
@@ -249,17 +319,20 @@ class clusterer:
         self.outlier = outlier_
         self.ppbin = ppbin
 
-        # Initialize attributes
-        ## Data containers
+        # Data containers
         self.clust_data = None
         self.scaler = StandardScaler()
 
-        ## Kernel for calculation of local density
+        # Kernel for calculation of local density
         self.kernel = clue_kernels.FlatKernel(0.5)
 
-        ## Output attributes
+        # Output attributes
         self.clust_prop = None
         self.elapsed_time = 0.
+
+        # Plotter attributes
+        self.input_plotter = InputPlotterProperties()
+        self.cluster_plotter = ClusterPlotterProperties()
 
     def set_params(self, dc: float, rhoc: float,
                    outlier: float, ppbin: int = 128) -> None:
