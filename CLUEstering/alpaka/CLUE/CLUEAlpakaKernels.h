@@ -14,8 +14,8 @@ using cms::alpakatools::VecArray;
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  constexpr int32_t max_followers{100};
-  constexpr int32_t max_seeds{100};
+  constexpr int32_t max_followers{1000};
+  constexpr int32_t max_seeds{500};
   constexpr int32_t reserve{1000000};
 
   template <uint8_t Ndim>
@@ -304,7 +304,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       const auto& seeds_0{seeds[0]};
       const auto n_seeds{seeds_0.size()};
       cms::alpakatools::for_each_element_in_grid(acc, n_seeds, [&](uint32_t idx_cls) {
-        int local_stack[256] = {-1};
+        int local_stack[512] = {-1};
         int local_stack_size{};
 
         int idx_this_seed{seeds_0[idx_cls]};
