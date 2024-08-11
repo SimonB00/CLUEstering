@@ -39,7 +39,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     TilesAlpaka<Ndim>* m_tiles;
     VecArray<int32_t, max_seeds>* m_seeds;
-    VecArray<int32_t, max_followers>* m_followers;
+    Followers* m_followers;
 
     template <typename KernelType>
     std::vector<std::vector<int>> make_clusters(Points<Ndim>& h_points,
@@ -63,10 +63,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cms::alpakatools::device_buffer<Device,
                                         cms::alpakatools::VecArray<int32_t, max_seeds>>>
         d_seeds;
-    std::optional<cms::alpakatools::device_buffer<
-        Device,
-        cms::alpakatools::VecArray<int32_t, max_followers>[]>>
-        d_followers;
+    std::optional<cms::alpakatools::device_buffer<Device, Followers>> d_followers;
 
     // Private methods
     void init_device(Queue queue_);
@@ -115,8 +112,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     d_tiles = cms::alpakatools::make_device_buffer<TilesAlpaka<Ndim>>(queue_);
     d_seeds = cms::alpakatools::make_device_buffer<
         cms::alpakatools::VecArray<int32_t, max_seeds>>(queue_);
-    d_followers = cms::alpakatools::make_device_buffer<
-        cms::alpakatools::VecArray<int32_t, max_followers>[]>(queue_, reserve);
+    d_followers = cms::alpakatools::make_device_buffer<Followers>(queue_);
 
     // Copy to the public pointers
     m_tiles = (*d_tiles).data();
@@ -207,9 +203,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                     h_points.n));
     alpaka::memset(queue_, (*d_seeds), 0x00);
 
-    alpaka::enqueue(queue_,
-                    alpaka::createTaskKernel<Acc1D>(
-                        work_div, KernelResetFollowers{}, m_followers, h_points.n));
+    /* alpaka::enqueue(queue_, */
+    /*                 alpaka::createTaskKernel<Acc1D>( */
+    /*                     work_div, KernelResetFollowers{}, m_followers, h_points.n)); */
   }
 
   // Public methods
@@ -236,14 +232,30 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                     dc_,
                                                     h_points.n));
 
+    auto nearestHighers =
+        cms::alpakatools::make_device_buffer<uint32_t[]>(queue_, h_points.n);
     alpaka::enqueue(queue_,
                     alpaka::createTaskKernel<Acc1D>(working_div,
                                                     KernelCalculateNearestHigher{},
                                                     m_tiles,
                                                     d_points.view(),
+                                                    nearestHighers.data(),
                                                     /* m_domains.data(), */
                                                     outlierDeltaFactor_,
                                                     dc_,
+                                                    h_points.n));
+    alpaka::enqueue(queue_,
+                    alpaka::createTaskKernel<Acc1D>(working_div,
+                                                    KernelCalculateOffset{},
+                                                    nearestHighers.data(),
+                                                    m_followers->offset(),
+                                                    h_points.n));
+    auto temp = cms::alpakatools::make_device_buffer<uint32_t[]>(queue_, h_points.n);
+    alpaka::enqueue(queue_,
+                    alpaka::createTaskKernel<Acc1D>(working_div,
+                                                    KernelOffsetAccumulate{},
+                                                    m_followers->offset(),
+                                                    temp.data(),
                                                     h_points.n));
 
     alpaka::enqueue(queue_,
@@ -252,6 +264,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                     m_seeds,
                                                     m_followers,
                                                     d_points.view(),
+                                                    temp.data(),
                                                     outlierDeltaFactor_,
                                                     dc_,
                                                     rhoc_,
