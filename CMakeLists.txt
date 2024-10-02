@@ -10,9 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-  set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -O0")
+  string(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -O0")
 elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  set(CMAKE_CXX_FLAGS "-O2")
+  string(APPEND CMAKE_CXX_FLAGS "-O2")
 endif()
 
 # include alpaka extern subfolder
