@@ -49,7 +49,7 @@ if(NOT DEFINED SERIAL_ONLY)
 endif()
 
 # create lib directory in CLUEstering folder
-execute_process(COMMAND mkdir -p ./CLUEstering/lib)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/CLUEstering/lib)
 
 # Convolutional Kernels compile convolutional kernel module
 pybind11_add_module(CLUE_Convolutional_Kernels SHARED
