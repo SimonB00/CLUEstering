@@ -66,7 +66,7 @@ target_compile_options(
 # set output directory
 set_target_properties(
   CLUE_Convolutional_Kernels PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                        ./lib/CLUEstering/lib/)
+                                        ${CMAKE_BINARY_DIR}lib/CLUEstering/lib/)
 # create link of shared object to lib folder inside CLUEstering directory
 file(GLOB CONV_MODULE
      ./build/lib/CLUEstering/lib/CLUE_Convolutional_Kernels*.so)
@@ -88,8 +88,9 @@ target_compile_options(
           -DALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           -DALPAKA_ACC_CPU_B_SEQ_T_SEQ_SYNC_BACKEND)
 # set output directory
-set_target_properties(CLUE_CPU_Serial PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                                 ./lib/CLUEstering/lib/)
+set_target_properties(
+  CLUE_CPU_Serial PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                             ${CMAKE_BINARY_DIR}/lib/CLUEstering/lib/)
 # create link of shared object to lib folder inside CLUEstering directory
 file(GLOB CONV_MODULE ./build/lib/CLUEstering/lib/CLUE_CPU_Serial*.so)
 foreach(CONV_MODULE ${CONV_MODULE})
@@ -113,8 +114,9 @@ if(NOT ${SERIAL_ONLY})
               -DALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED
               -DALPAKA_ACC_CPU_B_TBB_T_SEQ_ASYNC_BACKEND)
     target_link_libraries(CLUE_CPU_TBB PRIVATE TBB::tbb)
-    set_target_properties(CLUE_CPU_TBB PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                                  ./lib/CLUEstering/lib/)
+    set_target_properties(
+      CLUE_CPU_TBB PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                              ${CMAKE_BINARY_DIR}/lib/CLUEstering/lib/)
     # create link of shared object to lib folder inside CLUEstering directory
     file(GLOB CONV_MODULE ./build/lib/CLUEstering/lib/CLUE_CPU_TBB*.so)
     foreach(CONV_MODULE ${CONV_MODULE})
@@ -164,8 +166,9 @@ if((NOT ${CPU_ONLY}) AND (NOT ${SERIAL_ONLY}))
       CLUE_GPU_CUDA PRIVATE --expt-relaxed-constexpr -gencode
                             arch=compute_61,code=[sm_61,compute_61])
     # set output directory
-    set_target_properties(CLUE_GPU_CUDA PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                                   ./lib/CLUEstering/lib/)
+    set_target_properties(
+      CLUE_GPU_CUDA PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                               ${CMAKE_BINARY_DIR}/lib/CLUEstering/lib/)
     # create link of shared object to lib folder inside CLUEstering directory
     file(GLOB CONV_MODULE ./build/lib/CLUEstering/lib/CLUE_GPU_CUDA*.so)
     foreach(CONV_MODULE ${CONV_MODULE})
@@ -203,8 +206,9 @@ if((NOT ${CPU_ONLY}) AND (NOT ${SERIAL_ONLY}))
     target_include_directories(CLUE_GPU_HIP PRIVATE ${hip_BASE}/hiprand/include)
     target_include_directories(CLUE_GPU_HIP PRIVATE ${hip_BASE}/rocrand/include)
     # set output directory
-    set_target_properties(CLUE_GPU_HIP PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                                  ./lib/CLUEstering/lib/)
+    set_target_properties(
+      CLUE_GPU_HIP PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                              ${CMAKE_BINARY_DIR}/lib/CLUEstering/lib/)
     # create link of shared object to lib folder inside CLUEstering directory
     file(GLOB CONV_MODULE ./build/lib/CLUEstering/lib/CLUE_GPU_HIP*.so)
     foreach(CONV_MODULE ${CONV_MODULE})
