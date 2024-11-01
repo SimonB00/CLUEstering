@@ -35,14 +35,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             Queue queue_)
         : m_dc{cms::alpakatools::make_device_buffer<float[]>(queue_, Ndim)},
           m_dm{cms::alpakatools::make_device_buffer<float[]>(queue_, Ndim)},
-		  m_rhoc{rhoc},
+          m_rhoc{rhoc},
           pointsPerTile_{pPBin} {
-      alpaka::memcpy(queue_,
-                     m_dc,
-                     cms::alpakatools::make_host_view(dc.data(), Ndim));
-      alpaka::memcpy(queue_,
-                     m_dm,
-                     cms::alpakatools::make_host_view(dm.data(), Ndim));
+      alpaka::memcpy(queue_, m_dc, cms::alpakatools::make_host_view(dc.data(), Ndim));
+      alpaka::memcpy(queue_, m_dm, cms::alpakatools::make_host_view(dm.data(), Ndim));
       init_device(queue_);
     }
 
@@ -223,8 +219,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                     m_seeds,
                                                     m_followers,
                                                     d_points.view(),
-													m_dm.data(),
-													m_dc.data(),
+                                                    m_dm.data(),
+                                                    m_dc.data(),
                                                     m_rhoc,
                                                     h_points.n));
 
