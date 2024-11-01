@@ -23,7 +23,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     Points<Ndim> h_points(coordinates, weight);
     PointsAlpaka<Ndim> d_points(queue_, weight.size());
 
-    std::cout << __LINE__ << std::endl;
     return algo.make_clusters(h_points, d_points, kernel, queue_, block_size);
   }
 
