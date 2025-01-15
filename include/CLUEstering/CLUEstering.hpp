@@ -23,7 +23,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   template <uint8_t Ndim>
   class CLUEAlgoAlpaka {
   public:
-	explicit CLUEAlgoAlpaka(const std::vector<float>& dc,
+    explicit CLUEAlgoAlpaka(const std::vector<float>& dc,
                             const std::vector<float>& dm,
                             float rhoc,
                             int pPBin,
@@ -36,7 +36,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       alpaka::memcpy(queue_, m_dm, clue::make_host_view(dm.data(), Ndim));
       init_device(queue_);
     }
-
 
     TilesAlpaka<Ndim>* m_tiles;
     VecArray<int32_t, reserve>* m_seeds;

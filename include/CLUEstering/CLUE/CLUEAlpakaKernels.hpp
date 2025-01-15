@@ -199,7 +199,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
         float coords_j[Ndim];
         getCoords<Ndim>(coords_j, dev_points, j);
 
-		float radial_distance = 0.f;
+        float radial_distance = 0.f;
         float normalized_distance = 0.f;
         for (size_t dim = 0; dim != Ndim; ++dim) {
           float dist = coords_j[dim] - coords_i[dim];
@@ -294,16 +294,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                   const float* dc,
                                   float rho_c,
                                   uint32_t n_points) const {
-	  float equivalent_dc = 1.f;
-	  float equivalent_dm = 1.f;
-	  if (clue::once_per_grid(acc)) {
-		for (size_t dim = 0; dim != Ndim; ++dim) {
-		  equivalent_dc *= dc[dim];
-		  equivalent_dm *= dm[dim];
-		}
-		equivalent_dc = alpaka::math::sqrt(acc, equivalent_dc);
-		equivalent_dm = alpaka::math::sqrt(acc, equivalent_dm);
-	  }
+      float equivalent_dc = 1.f;
+      float equivalent_dm = 1.f;
+      if (clue::once_per_grid(acc)) {
+        for (size_t dim = 0; dim != Ndim; ++dim) {
+          equivalent_dc *= dc[dim];
+          equivalent_dm *= dm[dim];
+        }
+        equivalent_dc = alpaka::math::sqrt(acc, equivalent_dc);
+        equivalent_dm = alpaka::math::sqrt(acc, equivalent_dm);
+      }
 
       clue::for_each_element_in_grid(acc, n_points, [&](uint32_t i) {
         // initialize cluster_index
