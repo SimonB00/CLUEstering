@@ -2,7 +2,7 @@ name: test-with-conda
 dependencies:
   # - gcc_linux-64
   # - gxx_linux-64
-  - libgcc=5.2.0
+  - libgcc==5.2.0
   - python>=3.11
   - numpy
   - matplotlib
