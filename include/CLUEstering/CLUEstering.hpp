@@ -28,12 +28,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                             float rhoc,
                             int pPBin,
                             Queue queue_)
-        : m_dc{cms::alpakatools::make_device_buffer<float[]>(queue_, Ndim)},
-          m_dm{cms::alpakatools::make_device_buffer<float[]>(queue_, Ndim)},
+        : m_dc{clue::make_device_buffer<float[]>(queue_, Ndim)},
+          m_dm{clue::make_device_buffer<float[]>(queue_, Ndim)},
           m_rhoc{rhoc},
           pointsPerTile_{pPBin} {
-      alpaka::memcpy(queue_, m_dc, cms::alpakatools::make_host_view(dc.data(), Ndim));
-      alpaka::memcpy(queue_, m_dm, cms::alpakatools::make_host_view(dm.data(), Ndim));
+      alpaka::memcpy(queue_, m_dc, clue::make_host_view(dc.data(), Ndim));
+      alpaka::memcpy(queue_, m_dm, clue::make_host_view(dm.data(), Ndim));
       init_device(queue_);
     }
 
@@ -50,9 +50,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                        std::size_t block_size);
 
   private:
-    cms::alpakatools::device_buffer<Device, float[]> m_dc;
-    cms::alpakatools::device_buffer<Device, float[]> m_dm;
-    float dm_;
+    clue::device_buffer<Device, float[]> m_dc;
+    clue::device_buffer<Device, float[]> m_dm;
+    float m_rhoc;
     // average number of points found in a tile
     int pointsPerTile_;
 
@@ -181,7 +181,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                                     m_tiles,
                                                     d_points.view(),
                                                     kernel,
-                                                    m_dc.data,
+                                                    m_dc.data(),
                                                     nPoints));
     alpaka::enqueue(queue_,
                     alpaka::createTaskKernel<Acc1D>(working_div,
@@ -198,7 +198,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                                     d_points.view(),
                                                     m_dm.data(),
                                                     m_dm.data(),
-                                                    rhoc_,
+                                                    m_rhoc,
                                                     nPoints));
 
     // We change the working division when assigning the clusters

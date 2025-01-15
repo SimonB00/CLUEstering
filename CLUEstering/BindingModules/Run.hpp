@@ -9,14 +9,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   template <uint8_t Ndim, typename Kernel>
   void run(const std::vector<float>& dc,
            const std::vector<float>& dm,
-           float dm,
+           float rhoc,
            int pPBin,
            std::tuple<float*, int*>&& pData,
            const PointShape<Ndim>& shape,
            const Kernel& kernel,
            Queue queue_,
            size_t block_size) {
-    CLUEAlgoAlpaka<Ndim> algo(dc, rhoc, dm, pPBin, queue_);
+    CLUEAlgoAlpaka<Ndim> algo(dc, dm, rhoc, pPBin, queue_);
 
     // Create the host and device points
     PointsSoA<Ndim> h_points(std::get<0>(pData), std::get<1>(pData), shape);

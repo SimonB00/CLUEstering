@@ -243,7 +243,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                   PointsView<Ndim>* dev_points,
                                   float* dm,
                                   uint32_t n_points) const {
-      float dm_squared{dm * dm};
       clue::for_each_element_in_grid(acc, n_points, [&](uint32_t i) {
         float delta_i{std::numeric_limits<float>::max()};
         int nh_i{-1};
