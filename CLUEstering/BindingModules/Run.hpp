@@ -7,8 +7,8 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
   template <uint8_t Ndim, typename Kernel>
-  void run(float dc,
-           float rhoc,
+  void run(const std::vector<float>& dc,
+           const std::vector<float>& dm,
            float dm,
            int pPBin,
            std::tuple<float*, int*>&& pData,

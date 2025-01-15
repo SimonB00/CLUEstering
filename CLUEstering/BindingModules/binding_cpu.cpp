@@ -28,9 +28,9 @@ namespace alpaka_serial_sync {
   }
 
   template <typename Kernel>
-  void mainRun(float dc,
+  void mainRun(const std::vector<float>& dc,
+               const std::vector<float>& dm,
                float rhoc,
-               float dm,
                int pPBin,
                py::array_t<float> data,
                py::array_t<int> results,
@@ -173,8 +173,8 @@ namespace alpaka_serial_sync {
           &listDevices,
           "List the available devices for the CPU serial backend");
     m.def("mainRun",
-          pybind11::overload_cast<float,
-                                  float,
+          pybind11::overload_cast<const std::vector<float>&,
+                                  const std::vector<float>&,
                                   float,
                                   int,
                                   py::array_t<float>,
@@ -186,8 +186,8 @@ namespace alpaka_serial_sync {
                                   size_t>(&mainRun<FlatKernel>),
           "mainRun");
     m.def("mainRun",
-          pybind11::overload_cast<float,
-                                  float,
+          pybind11::overload_cast<const std::vector<float>&,
+                                  const std::vector<float>&,
                                   float,
                                   int,
                                   py::array_t<float>,
@@ -199,8 +199,8 @@ namespace alpaka_serial_sync {
                                   size_t>(&mainRun<ExponentialKernel>),
           "mainRun");
     m.def("mainRun",
-          pybind11::overload_cast<float,
-                                  float,
+          pybind11::overload_cast<const std::vector<float>&,
+                                  const std::vector<float>&,
                                   float,
                                   int,
                                   py::array_t<float>,
