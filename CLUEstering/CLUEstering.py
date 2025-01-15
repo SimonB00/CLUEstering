@@ -238,7 +238,7 @@ class clusterer:
         Execution time of the algorithm, expressed in nanoseconds.
     """
 
-    def __init__(self, dc_: float, rhoc_: float, dm_: [float, None] = None, ppbin: int = 10):
+    def __init__(self, dc_: [list, float], rhoc_: float, dm_: [list, float, None] = None, ppbin: int = 10):
         self.dc_ = dc_
         self.rhoc = rhoc_
         self.dm = dm_
@@ -472,6 +472,11 @@ class clusterer:
         if isinstance(input_data, (dict, pd.DataFrame)):
             df = self._read_dict_df(input_data)
             self._handle_dataframe(df)
+        
+        if isinstance(self.dc_, float):
+            self.dc_ = [self.dc_ for _ in range(self.clust_data.n_dim)]
+        if isinstance(self.dm, float):
+            self.dm = [self.dm for _ in range(self.clust_data.n_dim)]
 
     def choose_kernel(self,
                       choice: str,
@@ -675,13 +680,13 @@ class clusterer:
 
         start = time.time_ns()
         if backend == "cpu serial":
-            cluster_id_is_seed = cpu_serial.mainRun(self.dc_, self.rhoc, self.dm, self.ppbin,
+            cluster_id_is_seed = cpu_serial.mainRun(self.dc_, self.dm, self.rhoc, self.ppbin,
                                                     data.coords, data.results,
                                                     self.kernel, data.n_dim,
                                                     data.n_points, block_size, device_id)
         elif backend == "cpu tbb":
             if tbb_found:
-                cluster_id_is_seed = cpu_tbb.mainRun(self.dc_, self.rhoc, self.dm, self.ppbin,
+                cluster_id_is_seed = cpu_tbb.mainRun(self.dc_, self.dm, self.rhoc, self.ppbin,
                                                      data.coords, data.results,
                                                      self.kernel, data.n_dim,
                                                      data.n_points, block_size, device_id)
@@ -690,7 +695,7 @@ class clusterer:
 
         elif backend == "gpu cuda":
             if cuda_found:
-                cluster_id_is_seed = gpu_cuda.mainRun(self.dc_, self.rhoc, self.dm, self.ppbin,
+                cluster_id_is_seed = gpu_cuda.mainRun(self.dc_, self.dm, self.rhoc, self.ppbin,
                                                       data.coords, data.results,
                                                       self.kernel, data.n_dim,
                                                       data.n_points, block_size, device_id)
@@ -699,7 +704,7 @@ class clusterer:
 
         elif backend == "gpu hip":
             if hip_found:
-                cluster_id_is_seed = gpu_hip.mainRun(self.dc_, self.rhoc, self.dm, self.ppbin,
+                cluster_id_is_seed = gpu_hip.mainRun(self.dc_, self.dm, self.rhoc, self.ppbin,
                                                      data.coords, data.results,
                                                      self.kernel, data.n_dim,
                                                      data.n_points, block_size, device_id)
